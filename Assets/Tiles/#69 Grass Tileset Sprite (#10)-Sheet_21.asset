@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: '#69 Grass Tileset Sprite (#10)-Sheet_21'
   m_EditorClassIdentifier: 
   m_Sprite: {fileID: 7634888713443138338, guid: e0a7e9bda21181743bd209597e0206e5, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 1, b: 1, a: 0.972549}
   m_Transform:
     e00: 1
     e01: 0
@@ -33,4 +33,4 @@ MonoBehaviour:
     e33: 1
   m_InstancedGameObject: {fileID: 0}
   m_Flags: 1
-  m_ColliderType: 1
+  m_ColliderType: 2
