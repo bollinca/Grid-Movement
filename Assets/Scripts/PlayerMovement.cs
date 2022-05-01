@@ -7,61 +7,44 @@ public class PlayerMovement : MonoBehaviour
 
     private GameObject player;
     public Vector3 newPlayerPosition;
+    
     private float speed;
-    //private float movementModifier;
     private float inputPolarity;
+    
     private bool movementCompleted;
+    private bool isPlayerMoving;
 
-    // Start is called before the first frame update
     void Start()
     {
         player = gameObject;
-        speed = 0.1f;
-        //movementModifier = 0.01f;
+        speed = 0.3f;
+        isPlayerMoving = false;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        if (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0)
+
+        //Moves player by one space, but only if previous movement call has finished.
+        if (PlayerTriedToMove() && isPlayerMoving == false)
         {
-            StartCoroutine(MoveOneGrid());
+            StartCoroutine(Move());
         }
     }
 
-    //void MoveFree()
-    //{
-    //    if (Mathf.Abs(Input.GetAxis("Vertical")) == 1)
-    //    {
-    //        player.transform.Translate(Vector3.up * movementModifier * Input.GetAxis("Vertical"));
-    //    }
-    //    else if (Mathf.Abs(Input.GetAxis("Horizontal")) == 1)
-    //    {
-    //        player.transform.Translate(Vector3.right * movementModifier * Input.GetAxis("Horizontal"));
-    //    }
-    //    ;
-    //}
 
-
-
-    //void setNewLocation()
-    //{
-    //    //determine direction player is moving in and set position to move towards
-    //    if (Input.GetAxis("Vertical") != 0)
-    //    {
-    //        inputPolarity = Mathf.Sign(Input.GetAxis("Vertical"));
-    //        newLocation = new Vector3(transform.position.x, transform.position.y + inputPolarity, transform.position.z);
-    //    }
-    //    else if (Input.GetAxis("Horizontal") != 0)
-    //    {
-    //        inputPolarity = Mathf.Sign(Input.GetAxis("Horizontal"));
-    //        newLocation = new Vector3(transform.position.x + inputPolarity, transform.position.y, transform.position.z);
-    //    }
-    //}
-
-    void SetTargetLocation()
+    // Check for horizontal/vertical input.
+    bool PlayerTriedToMove()
     {
-        //determine direction player is moving in and set position to move towards
+        if (Input.GetAxis("Vertical") != 0 || Input.GetAxis("Horizontal") != 0)
+        {
+            return true;
+        }
+        else return false;
+    }
+
+    void SetMoveTarget()
+    {
+        //determine direction player is moving in and set new destination
         if (Input.GetAxis("Vertical") != 0)
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Vertical"));
@@ -74,12 +57,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    void MoveTowardTarget()
+    // Moves player gradually
+    void MoveTowardsTarget()
     {
         transform.position = Vector3.MoveTowards(transform.position, newPlayerPosition, Time.fixedDeltaTime * speed);
     }
 
-    bool isMovementCompleted()
+    //Checks if movement is complete and repeats movement until destination is reached.
+    bool IsMovementDone()
     {
         if (player.transform.position == newPlayerPosition)
         {
@@ -88,13 +73,18 @@ public class PlayerMovement : MonoBehaviour
         }
         else
         {
-            MoveTowardTarget();
+            MoveTowardsTarget();
             return movementCompleted = false;
         }
     }
-    IEnumerator MoveOneGrid()
+
+
+    //Isolates movement from update function, preventing extra input and forcing movement to grid.
+    IEnumerator Move()
     {
-        SetTargetLocation();
-        yield return new WaitUntil(isMovementCompleted);
+        isPlayerMoving = true;
+        SetMoveTarget();
+        yield return new WaitUntil(IsMovementDone);
+        isPlayerMoving = false;
     }
 }
