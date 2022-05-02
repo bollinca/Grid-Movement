@@ -24,7 +24,7 @@ public class PlayerMovement : MonoBehaviour
         player = gameObject;
         speed = 0.3f;
         isPlayerMoving = false;
-        timeOutLimit = 0.32f;
+        timeOutLimit = 0.4f;
     }
 
     void FixedUpdate()
