@@ -2,127 +2,113 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-
-
-//Things to fix:
-// Player movement gets stuck sometimes when pins fail to despawn (might be fixed by previous bug fix)
-// Need to refactor.
-// use gameobject position
-
-
 public class EnemyImpact : MonoBehaviour
 {
-    private BoxCollider2D enemyCollider;
-    private string impactDirection;
+    //Position shorthand
     private Vector2 playerPos;
     private Vector2 enemyPos;
 
-    //For finding impact direction
+    //Readonly
+    private readonly int zeroAxis = 0;
+    private readonly float deathSpeed = 0.2f;
+
+    //For finding player location/impact source
+    private string impactSource;
     private float leftOrRight;
-    private float upOrDown;
-    readonly int zeroAxis = 0; // named for legibility
-    private float bumpMoveSpeed = 0.2f;
-    private Vector2 enemyPosition;
+    private float aboveOrBelow;
+
+    //For death animation
     private Vector2 deadEnemyPosition;
     private float randomAngle;
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        enemyCollider = gameObject.GetComponent<BoxCollider2D>();
-        enemyPosition = gameObject.transform.position;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        //Sets player and enemy positions for easy reference
         playerPos = collision.gameObject.transform.position;
         enemyPos = gameObject.transform.position;
 
-        print("Collision detected!");
-        impactDirection = FindImpactDirection();
-        deadEnemyPosition = CalcCorpsePosition(impactDirection, enemyPosition);
+        impactSource = FindImpactSource();
+        deadEnemyPosition = CalcCorpsePosition(impactSource);
+        //Randomizes rotation for each individual death "animation".
         randomAngle = Random.Range(-0.8f, 0.8f);
-        StartCoroutine(destroyEnemy(gameObject, deadEnemyPosition, randomAngle));
+        StartCoroutine(DestroyEnemy(gameObject, deadEnemyPosition));
     }
 
-    string FindImpactDirection()
+    string FindImpactSource()
     {
+        //Compares player location to enemy location. Right/Above = 1, Left/Below = -1
         leftOrRight = Mathf.Round(playerPos.x - enemyPos.x);
-        upOrDown = Mathf.Round(playerPos.y - enemyPos.y);
+        aboveOrBelow = Mathf.Round(playerPos.y - enemyPos.y);
 
-        if (upOrDown == zeroAxis) //Neither up nor down
+        //Used to feed origin of impact to death animation
+        if (leftOrRight != zeroAxis)
         {
-            switch (leftOrRight > 0)
+            if (leftOrRight > zeroAxis)
             {
-                case true:
-                    return "right";
-                case false:
-                    return "left";
+                return "right";
             }
+            return "left";
         }
-        switch (upOrDown > zeroAxis)
+        else if (aboveOrBelow != zeroAxis)
         {
-            case true:
-                return "up";
-            case false:
-                return "down";
+            if (aboveOrBelow > zeroAxis)
+            {
+                return "above";
+            }
+            return "below";
         }
+        return "ERROR";
     }
 
-    Vector2 CalcCorpsePosition(string direction, Vector2 pinPosition)
+    Vector2 CalcCorpsePosition(string direction)
     {
         int impact = 1;
+
+        //create copy of enemyPos to prevent changes to original during calculations.
+        Vector2 deadPosition = enemyPos;
 
         switch (direction)
         {
             case "right":
-                deadEnemyPosition = new Vector2(pinPosition.x - impact, pinPosition.y);
+                deadPosition.x -= impact;
                 break;
             case "left":
-                deadEnemyPosition = new Vector2(pinPosition.x + impact, pinPosition.y);
+                deadPosition.x += impact;
                 break;
-            case "up":
-                deadEnemyPosition = new Vector2(pinPosition.x, pinPosition.y - impact);
+            case "above":
+                deadPosition.y -= impact;
                 break;
-            case "down":
-                deadEnemyPosition = new Vector2(pinPosition.x, pinPosition.y + impact);
+            case "below":
+                deadPosition.y += impact;
                 break;
 
         }
-        return deadEnemyPosition;
+        return deadPosition;
     }
 
-    bool IsDeathMovementDone(GameObject bowlingPin, Vector2 deadPosition)
+    //This function gets looped!
+    bool IsDeathMovementDone(Vector2 deadPosition)
     {
-        float enemyX = bowlingPin.transform.position.x;
-        float enemyY = bowlingPin.transform.position.y;
+        //enemyPos is declared to ensure that it is constantly updated during function loop.
+        enemyPos = gameObject.transform.position;
 
-        if ((enemyX == deadPosition.x) && (enemyY == deadPosition.y))
+        //If corpse has reached its target
+        if ((enemyPos.x == deadPosition.x) && (enemyPos.y == deadPosition.y))
         {
-            print("true incoming");
             return true;
         };
-        print("false incoming");
-        bowlingPin.transform.position = Vector2.MoveTowards(bowlingPin.transform.position, deadPosition, bumpMoveSpeed * Time.fixedDeltaTime);
-        bowlingPin.transform.RotateAround(bowlingPin.transform.position, Vector3.forward, randomAngle);
+        //otherwise, keep moving towards target and rotating.
+        gameObject.transform.position = Vector2.MoveTowards(enemyPos, deadPosition, deathSpeed * Time.fixedDeltaTime); //has to use gameObject.transform.position, otherwise a copy is altered instead of the actual object.
+        gameObject.transform.RotateAround(enemyPos, Vector3.forward, randomAngle);
 
         return false;
     }
 
-    IEnumerator destroyEnemy(GameObject bowlingPin, Vector2 deadPosition, float randomAngle)
+    IEnumerator DestroyEnemy(GameObject bowlingPin, Vector2 deadPosition)
     {
-        float enemyX = bowlingPin.transform.position.x;
-        float enemyY = bowlingPin.transform.position.y;
-
-        //bowlingPin.transform.RotateAround(bowlingPin.transform.position, Vector3.forward, randomAngle);
-        yield return new WaitUntil(() => IsDeathMovementDone(bowlingPin, deadPosition));
+        //trigger loop of IsDeathMovementDone (until true)
+        yield return new WaitUntil(() => IsDeathMovementDone(deadPosition));
         Destroy(bowlingPin);
     }
-
 }
