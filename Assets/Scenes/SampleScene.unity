@@ -252,7 +252,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.9597707, y: 0.98243785}
+  m_Size: {x: 0.9597707, y: 0.84730625}
   m_EdgeRadius: 0
 --- !u!114 &71062162
 MonoBehaviour:
@@ -301,7 +301,7 @@ GameObject:
   - component: {fileID: 159000637}
   - component: {fileID: 159000636}
   - component: {fileID: 159000635}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: CollisionMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1984,15 +1984,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_RootOrder
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -3.520734
+      value: -3.545
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 1.0694009
+      value: 1.038
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -2039,17 +2039,21 @@ PrefabInstance:
       propertyPath: m_Name
       value: EnemyPin (1)
       objectReference: {fileID: 0}
+    - target: {fileID: 5850107001681708804, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
+      propertyPath: m_Layer
+      value: 7
+      objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_RootOrder
-      value: 2
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -0.73612165
+      value: -0.52
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -3.7956624
+      value: -4.04
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_LocalPosition.z
@@ -3428,6 +3432,10 @@ PrefabInstance:
     - target: {fileID: 5850107001681708804, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_Name
       value: EnemyPin
+      objectReference: {fileID: 0}
+    - target: {fileID: 5850107001681708804, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
+      propertyPath: m_Layer
+      value: 7
       objectReference: {fileID: 0}
     - target: {fileID: 5850107001681708921, guid: 178117b21bbd1b8458610a99a34c484f, type: 3}
       propertyPath: m_RootOrder

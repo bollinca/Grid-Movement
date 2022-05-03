@@ -5,9 +5,9 @@ using UnityEngine;
 
 
 //Things to fix:
-//Pins Get stuck on non-player colliders (should ignore all other colliders)
 // Player movement gets stuck sometimes when pins fail to despawn (might be fixed by previous bug fix)
 // Need to refactor.
+// use gameobject position
 
 
 public class EnemyImpact : MonoBehaviour
@@ -46,7 +46,7 @@ public class EnemyImpact : MonoBehaviour
 
         print("Collision detected!");
         impactDirection = FindImpactDirection();
-        deadEnemyPosition = setCorpsePosition(impactDirection, enemyPosition);
+        deadEnemyPosition = CalcCorpsePosition(impactDirection, enemyPosition);
         randomAngle = Random.Range(-0.8f, 0.8f);
         StartCoroutine(destroyEnemy(gameObject, deadEnemyPosition, randomAngle));
     }
@@ -75,7 +75,7 @@ public class EnemyImpact : MonoBehaviour
         }
     }
 
-    Vector2 setCorpsePosition(string direction, Vector2 pinPosition)
+    Vector2 CalcCorpsePosition(string direction, Vector2 pinPosition)
     {
         int impact = 1;
 
