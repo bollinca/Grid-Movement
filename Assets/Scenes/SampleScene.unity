@@ -241,7 +241,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.006251335, y: -0.5087811}
+  m_Offset: {x: 0.008441925, y: -0.517597}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -252,7 +252,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.9597707, y: 0.84730625}
+  m_Size: {x: 0.80108356, y: 0.82967436}
   m_EdgeRadius: 0
 --- !u!114 &71062162
 MonoBehaviour:
@@ -303,7 +303,7 @@ GameObject:
   - component: {fileID: 159000635}
   m_Layer: 6
   m_Name: CollisionMap
-  m_TagString: Untagged
+  m_TagString: Terrain
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
