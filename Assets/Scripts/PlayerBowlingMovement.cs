@@ -26,6 +26,7 @@ public class PlayerBowlingMovement : MonoBehaviour
         //Moves player by one space, but only if previous movement call has finished.
         if (PlayerTriedToMove() && isPlayerMoving == false)
         {
+            movementCompleted = false;
             StartCoroutine(Move());
         }
     }
@@ -67,15 +68,20 @@ public class PlayerBowlingMovement : MonoBehaviour
     }
 
     //Checks if movement is complete. (Used to repeat movement until destination is reached.)
-    bool IsMovementDone()
+    bool HasPlayerAdvanced()
     {
         MoveTowardsTarget();
+        EndMovement();
+        return movementCompleted;
+    }
+
+    void EndMovement()
+    {
         if (player.transform.position == newPosition)
         {
             movementCompleted = true;
-            return movementCompleted;
+            isPlayerMoving = false;
         }
-        return movementCompleted = false;
     }
 
     void CancelMovement()
@@ -88,8 +94,7 @@ public class PlayerBowlingMovement : MonoBehaviour
     {
         isPlayerMoving = true;
         CalcMoveTarget();
-        yield return new WaitUntil(IsMovementDone);
-        isPlayerMoving = false;
+        yield return new WaitUntil(HasPlayerAdvanced);
     }
 
     //Cancels movement if player collides with terrain
@@ -107,7 +112,7 @@ public class PlayerBowlingMovement : MonoBehaviour
     {
         if (collision.gameObject.tag == "Enemy")
         {
-            //EndMovement
+            EndMovement();
         };
     }
 }
