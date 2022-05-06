@@ -10,6 +10,7 @@ public class PlayerBowlingMovement : MonoBehaviour
 
     private float speed;
     private float inputPolarity;
+    private Vector2 raycastDirection;
 
     private bool movementCompleted;
     private bool isPlayerMoving;
@@ -24,7 +25,7 @@ public class PlayerBowlingMovement : MonoBehaviour
     void FixedUpdate()
     {
         //Moves player by one space, but only if previous movement call has finished.
-        if (PlayerTriedToMove() && isPlayerMoving == false)
+        if (PlayerTriedToMove() && !isPlayerMoving)
         {
             movementCompleted = false;
             StartCoroutine(Move());
@@ -53,11 +54,13 @@ public class PlayerBowlingMovement : MonoBehaviour
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Vertical"));
             newPosition.y += inputPolarity;
+            raycastDirection = new Vector2(0, inputPolarity);
         }
         else if (Input.GetAxis("Horizontal") != 0)
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Horizontal"));
             newPosition.x += inputPolarity;
+            raycastDirection = new Vector2(inputPolarity, 0);
         }
     }
 
@@ -84,6 +87,12 @@ public class PlayerBowlingMovement : MonoBehaviour
         }
     }
 
+    void RayTest()
+    {
+        RaycastHit2D rayHit = Physics2D.Raycast(newPosition, raycastDirection);
+        print(rayHit.collider);
+    }
+
     void CancelMovement()
     {
         newPosition = oldPosition;
@@ -94,23 +103,22 @@ public class PlayerBowlingMovement : MonoBehaviour
     {
         isPlayerMoving = true;
         CalcMoveTarget();
+        RayTest();
         yield return new WaitUntil(HasPlayerAdvanced);
     }
 
     //Cancels movement if player collides with terrain
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Terrain")
+        if (collision.gameObject.CompareTag("Terrain"))
         {
             CancelMovement();
         }
     }
 
-
-    //draft for bowling style
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "Enemy")
+        if (collision.gameObject.CompareTag("Enemy"))
         {
             EndMovement();
         };
