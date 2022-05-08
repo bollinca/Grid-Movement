@@ -8,8 +8,6 @@ public class PlayerBowlingMovement : MonoBehaviour
     private GameObject player;
     public Vector3 newPosition;
     public Vector3 oldPosition;
-    public Tilemap colliderMap; //found in engine
-    public GridLayout gridLayout;
     public Grid grid;
 
     private float speed;
@@ -92,23 +90,29 @@ public class PlayerBowlingMovement : MonoBehaviour
         }
     }
 
-    void RayTest()
+    void FindStopPosition()
     {
-        BoxCollider2D playerCollider = gameObject.GetComponent<BoxCollider2D>();
-        Vector2 playerColCenter = playerCollider.bounds.center;
+        float leftMoveOffset = 0.8f;
+        BoxCollider2D playerCol = gameObject.GetComponent<BoxCollider2D>();
+        Vector2 playerColCenter = playerCol.bounds.center;
         Vector2 raycastDirection = new Vector2(cardinalDirection.x, cardinalDirection.y);
         RaycastHit2D rayHit = Physics2D.Raycast(playerColCenter, raycastDirection);
+
         if (rayHit)
         {
+            Vector2 strikePoint = rayHit.point;
+            if (cardinalDirection.x == -1)
+            {
+                strikePoint.x -= leftMoveOffset;
+            }
             Debug.DrawLine(playerColCenter, rayHit.point, Color.black, 5f);
             if (rayHit.transform.CompareTag("Terrain"))
             {
-                Vector3 cellPosition = gridLayout.WorldToCell(rayHit.point);
-                Vector3Int roundedHit = Vector3Int.FloorToInt(cellPosition);
-                cellPosition = grid.GetCellCenterWorld(roundedHit);
-                print(cellPosition);
-                Debug.DrawLine(playerColCenter, cellPosition, Color.red, 5f);
-
+                Vector3 cellPos = grid.WorldToCell(strikePoint);
+                Vector3Int roundedCellPos = Vector3Int.FloorToInt(strikePoint);
+                Vector3 cellCenter = grid.GetCellCenterWorld(roundedCellPos);
+                print(cellPos);
+                Debug.DrawLine(playerColCenter, cellCenter, Color.red, 5f);
             };
         }
     }
@@ -123,7 +127,7 @@ public class PlayerBowlingMovement : MonoBehaviour
     {
         isPlayerMoving = true;
         CalcMoveTarget();
-        RayTest();
+        FindStopPosition();
         yield return new WaitUntil(HasPlayerAdvanced);
     }
 
