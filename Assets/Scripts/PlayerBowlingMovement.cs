@@ -6,8 +6,9 @@ using UnityEngine.Tilemaps;
 public class PlayerBowlingMovement : MonoBehaviour
 {
     private GameObject player;
-    public Vector3 newPosition;
-    public Vector3 oldPosition;
+    public Vector3 moveDirection;
+    public Vector3 oldPos;
+    private Vector3 finalPos;
     public Grid grid;
 
     private float speed;
@@ -22,7 +23,7 @@ public class PlayerBowlingMovement : MonoBehaviour
         player = gameObject;
         speed = 0.3f;
         isPlayerMoving = false;
-        oldPosition = transform.position;
+        oldPos = transform.position;
     }
 
     void FixedUpdate()
@@ -48,21 +49,21 @@ public class PlayerBowlingMovement : MonoBehaviour
     void CalcMoveTarget()
     {
         //Save previous position in case of movement cancellation
-        oldPosition = transform.position;
+        oldPos = transform.position;
         //Copy for calculations
-        newPosition = transform.position;
+        moveDirection = transform.position;
 
         //determine direction player is moving in and set new destination
         if (Input.GetAxis("Vertical") != 0)
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Vertical"));
-            newPosition.y += inputPolarity;
+            moveDirection.y += inputPolarity;
             cardinalDirection = new Vector2(0, inputPolarity);
         }
         else if (Input.GetAxis("Horizontal") != 0)
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Horizontal"));
-            newPosition.x += inputPolarity;
+            moveDirection.x += inputPolarity;
             cardinalDirection = new Vector2(inputPolarity, 0);
         }
     }
@@ -70,11 +71,11 @@ public class PlayerBowlingMovement : MonoBehaviour
     // Moves player gradually
     void MoveTowardsTarget()
     {
-        transform.position = Vector3.MoveTowards(transform.position, newPosition, Time.fixedDeltaTime * speed);
+        transform.position = Vector3.MoveTowards(transform.position, finalPos, Time.fixedDeltaTime * speed);
     }
 
     //Checks if movement is complete. (Used to repeat movement until destination is reached.)
-    bool HasPlayerAdvanced()
+    bool IsMovementComplete()
     {
         MoveTowardsTarget();
         EndMovement();
@@ -83,7 +84,7 @@ public class PlayerBowlingMovement : MonoBehaviour
 
     void EndMovement()
     {
-        if (player.transform.position == newPosition)
+        if (player.transform.position == finalPos)
         {
             movementCompleted = true;
             isPlayerMoving = false;
@@ -92,7 +93,7 @@ public class PlayerBowlingMovement : MonoBehaviour
 
     void FindStopPosition()
     {
-        float leftMoveOffset = 0.8f;
+        float leftDownOffset = 0.8f;
         BoxCollider2D playerCol = gameObject.GetComponent<BoxCollider2D>();
         Vector2 playerColCenter = playerCol.bounds.center;
         Vector2 raycastDirection = new Vector2(cardinalDirection.x, cardinalDirection.y);
@@ -103,23 +104,32 @@ public class PlayerBowlingMovement : MonoBehaviour
             Vector2 strikePoint = rayHit.point;
             if (cardinalDirection.x == -1)
             {
-                strikePoint.x -= leftMoveOffset;
+                strikePoint.x -= leftDownOffset;
             }
-            Debug.DrawLine(playerColCenter, rayHit.point, Color.black, 5f);
+            if (cardinalDirection.y == -1)
+            {
+                strikePoint.y -= leftDownOffset;
+            }
+            //Debug.DrawLine(playerColCenter, rayHit.point, Color.black, 5f);
+
+            Vector3 cellPos = grid.WorldToCell(strikePoint);
+            Vector3Int intCellPos = Vector3Int.FloorToInt(cellPos);
+            Vector3 cellCenter = grid.GetCellCenterWorld(intCellPos);
+
+            //Debug.DrawLine(playerColCenter, cellCenter, Color.red, 5f);
+
             if (rayHit.transform.CompareTag("Terrain"))
             {
-                Vector3 cellPos = grid.WorldToCell(strikePoint);
-                Vector3Int roundedCellPos = Vector3Int.FloorToInt(strikePoint);
-                Vector3 cellCenter = grid.GetCellCenterWorld(roundedCellPos);
-                print(cellPos);
-                Debug.DrawLine(playerColCenter, cellCenter, Color.red, 5f);
-            };
+                finalPos = new Vector2(cellCenter.x - raycastDirection.x, cellCenter.y - raycastDirection.y);
+                //Debug.DrawLine(playerColCenter, finalPos, Color.green, 5f)
+                //print("TERRAIN BLOCK: " + cellCenter + ", Player Destination: " + finalPos + ", CURRENT POSITION: " + player.transform.position);
+            }
+            else if (rayHit.transform.CompareTag("Enemy"))
+            {
+                finalPos = cellCenter;
+                Debug.DrawLine(playerColCenter, finalPos, Color.green, 5f);
+            }
         }
-    }
-
-    void CancelMovement()
-    {
-        newPosition = oldPosition;
     }
 
     //Isolates movement from update function, preventing extra input and forcing movement to grid.
@@ -128,23 +138,6 @@ public class PlayerBowlingMovement : MonoBehaviour
         isPlayerMoving = true;
         CalcMoveTarget();
         FindStopPosition();
-        yield return new WaitUntil(HasPlayerAdvanced);
-    }
-
-    //Cancels movement if player collides with terrain
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Terrain"))
-        {
-            CancelMovement();
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy"))
-        {
-            EndMovement();
-        };
+        yield return new WaitUntil(IsMovementComplete);
     }
 }
