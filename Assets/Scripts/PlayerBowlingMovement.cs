@@ -1,16 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 public class PlayerBowlingMovement : MonoBehaviour
 {
     private GameObject player;
     public Vector3 newPosition;
     public Vector3 oldPosition;
+    public Tilemap colliderMap; //found in engine
+    public GridLayout gridLayout;
+    public Grid grid;
 
     private float speed;
     private float inputPolarity;
-    private Vector2 raycastDirection;
+    private Vector2 cardinalDirection;
 
     private bool movementCompleted;
     private bool isPlayerMoving;
@@ -20,6 +24,7 @@ public class PlayerBowlingMovement : MonoBehaviour
         player = gameObject;
         speed = 0.3f;
         isPlayerMoving = false;
+        oldPosition = transform.position;
     }
 
     void FixedUpdate()
@@ -54,13 +59,13 @@ public class PlayerBowlingMovement : MonoBehaviour
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Vertical"));
             newPosition.y += inputPolarity;
-            raycastDirection = new Vector2(0, inputPolarity);
+            cardinalDirection = new Vector2(0, inputPolarity);
         }
         else if (Input.GetAxis("Horizontal") != 0)
         {
             inputPolarity = Mathf.Sign(Input.GetAxis("Horizontal"));
             newPosition.x += inputPolarity;
-            raycastDirection = new Vector2(inputPolarity, 0);
+            cardinalDirection = new Vector2(inputPolarity, 0);
         }
     }
 
@@ -89,8 +94,23 @@ public class PlayerBowlingMovement : MonoBehaviour
 
     void RayTest()
     {
-        RaycastHit2D rayHit = Physics2D.Raycast(newPosition, raycastDirection);
-        print(rayHit.collider);
+        BoxCollider2D playerCollider = gameObject.GetComponent<BoxCollider2D>();
+        Vector2 playerColCenter = playerCollider.bounds.center;
+        Vector2 raycastDirection = new Vector2(cardinalDirection.x, cardinalDirection.y);
+        RaycastHit2D rayHit = Physics2D.Raycast(playerColCenter, raycastDirection);
+        if (rayHit)
+        {
+            Debug.DrawLine(playerColCenter, rayHit.point, Color.black, 5f);
+            if (rayHit.transform.CompareTag("Terrain"))
+            {
+                Vector3 cellPosition = gridLayout.WorldToCell(rayHit.point);
+                Vector3Int roundedHit = Vector3Int.FloorToInt(cellPosition);
+                cellPosition = grid.GetCellCenterWorld(roundedHit);
+                print(cellPosition);
+                Debug.DrawLine(playerColCenter, cellPosition, Color.red, 5f);
+
+            };
+        }
     }
 
     void CancelMovement()
