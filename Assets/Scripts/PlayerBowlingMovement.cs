@@ -18,10 +18,13 @@ public class PlayerBowlingMovement : MonoBehaviour
     private bool movementCompleted;
     private bool isPlayerMoving;
 
+    private bool leftToRight;
+    private bool upToDown;
+
     void Start()
     {
         player = gameObject;
-        speed = 0.3f;
+        speed = 1.5f;
         isPlayerMoving = false;
         oldPos = transform.position;
     }
@@ -138,6 +141,6 @@ public class PlayerBowlingMovement : MonoBehaviour
         isPlayerMoving = true;
         CalcMoveTarget();
         FindStopPosition();
-        yield return new WaitUntil(IsMovementComplete);
+        yield return new WaitUntil(IsMovementComplete); //is this where the resolution based speed differences are coming from?
     }
 }
